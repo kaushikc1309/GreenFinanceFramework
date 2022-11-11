@@ -132,7 +132,7 @@ namespace Microsoft.CognitiveSearch.WebApiSkills
                     //var cryptos = new List<string> { "test1", "test2" };
 
                     outRecord.Data["gbpCategories"] = cryptos.ToArray().Distinct();
-                    outRecord.Data["score"] = cryptos.ToArray().Distinct().Count();
+                    //outRecord.Data["score"] = cryptos.ToArray().Distinct().Count();
                     return outRecord;
                 });
 
