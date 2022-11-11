@@ -10,10 +10,10 @@ namespace Microsoft.CognitiveSearch.Skills.Cryptonyms
         public CryptonymLinker(string executingDirectoryPath)
         {
             string json = File.ReadAllText($"{executingDirectoryPath}\\CryptonymLinker\\cia-cryptonyms.json");
-            Cryptonyms = new Dictionary<string,string>(JsonConvert.DeserializeObject<Dictionary<string, string>>(json), StringComparer.InvariantCultureIgnoreCase);
+            Cryptonyms = new List<string>(JsonConvert.DeserializeObject<List<string>>(json));
         }
 
-        public Dictionary<string, string> Cryptonyms
+        public List<string> Cryptonyms
         {
             get; private set;
         }

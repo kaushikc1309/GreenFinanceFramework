@@ -44,61 +44,6 @@ namespace Microsoft.CognitiveSearch.WebApiSkills
             return (ActionResult)new OkObjectResult(facetGraph);
         }
 
-        [FunctionName("link-cryptonyms")]
-        public static IActionResult RunCryptonymLinker([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]HttpRequest req, TraceWriter log, ExecutionContext executionContext)
-        {
-            string skillName = executionContext.FunctionName;
-            IEnumerable<WebApiRequestRecord> requestRecords = WebApiSkillHelpers.GetRequestRecords(req);
-            if (requestRecords == null)
-            {
-                return new BadRequestObjectResult($"{skillName} - Invalid request record array.");
-            }
-
-            CryptonymLinker cryptonymLinker = new CryptonymLinker(executionContext.FunctionAppDirectory);
-            WebApiSkillResponse response = WebApiSkillHelpers.ProcessRequestRecords(skillName, requestRecords,
-                (inRecord, outRecord) => {
-                    string word = inRecord.Data["word"] as string;
-                    if (word.All(Char.IsUpper) && cryptonymLinker.Cryptonyms.TryGetValue(word, out string description))
-                    {
-                        outRecord.Data["cryptonym"] = new { value = word, description };
-                    }
-                    return outRecord;
-                });
-
-            return (ActionResult)new OkObjectResult(response);
-        }
-
-        [FunctionName("link-cryptonyms-list")]
-        public static IActionResult RunCryptonymLinkerForLists([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]HttpRequest req, TraceWriter log, ExecutionContext executionContext)
-        {
-            string skillName = executionContext.FunctionName;
-            IEnumerable<WebApiRequestRecord> requestRecords = WebApiSkillHelpers.GetRequestRecords(req);
-            if (requestRecords == null)
-            {
-                return new BadRequestObjectResult($"{skillName} - Invalid request record array.");
-            }
-
-            CryptonymLinker cryptonymLinker = new CryptonymLinker(executionContext.FunctionAppDirectory);
-            WebApiSkillResponse response = WebApiSkillHelpers.ProcessRequestRecords(skillName, requestRecords,
-                (inRecord, outRecord) => {
-                    var words = JsonConvert.DeserializeObject<JArray>(JsonConvert.SerializeObject(inRecord.Data["words"]));
-                    var cryptos = words.Select(jword =>
-                    {
-                        var word = jword.Value<string>();
-                        if (word.All(Char.IsUpper) && cryptonymLinker.Cryptonyms.TryGetValue(word, out string description))
-                        {
-                            return new { value = word, description };
-                        }
-                        return null;
-                    });
-
-                    outRecord.Data["cryptonyms"] = cryptos.ToArray();
-                    return outRecord;
-                });
-
-            return (ActionResult)new OkObjectResult(response);
-        }
-
         [FunctionName("image-store")]
         public static async Task<IActionResult> RunImageStore([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]HttpRequest req, TraceWriter log, ExecutionContext executionContext)
         {
@@ -173,18 +118,18 @@ namespace Microsoft.CognitiveSearch.WebApiSkills
             CryptonymLinker cryptonymLinker = new CryptonymLinker(executionContext.FunctionAppDirectory);
             WebApiSkillResponse response = WebApiSkillHelpers.ProcessRequestRecords(skillName, requestRecords,
                 (inRecord, outRecord) => {
-                    var words = JsonConvert.DeserializeObject<JValue>(JsonConvert.SerializeObject(inRecord.Data["words"]));
-            //var cryptos = words.Select(jword =>
-            //{
-            //    var word = jword.Value<string>();
-            //    if (cryptonymLinker.Cryptonyms.Contains(word))
-            //    {
-            //        return new { value = word };
-            //    }
-            //    return null;
-            //});
+                    var documentContent = JsonConvert.DeserializeObject<JValue>(JsonConvert.SerializeObject(inRecord.Data["documentContent"]));
+                    var cryptos = documentContent.Select(jword =>
+                    {
+                        var word = jword.Value<string>();
+                        if (cryptonymLinker.Cryptonyms.Contains(word))
+                        {
+                            return new { value = word };
+                        }
+                        return null;
+                    });
 
-                    var cryptos = new List<string> { "test1", "test2" };
+                    //var cryptos = new List<string> { "test1", "test2" };
 
                     outRecord.Data["gbpCategories"] = cryptos.ToArray().Distinct();
                     outRecord.Data["score"] = cryptos.ToArray().Distinct().Count();

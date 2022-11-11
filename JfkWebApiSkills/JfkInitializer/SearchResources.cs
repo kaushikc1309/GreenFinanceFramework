@@ -279,38 +279,21 @@ namespace JfkInitializer
                     },
                     new WebApiSkill(inputs: new List<InputFieldMappingEntry>()
                         {
-                            new InputFieldMappingEntry(name: "words")
+                            new InputFieldMappingEntry(name: "documentContent")
                             {
-                                Source = "/document/normalized_images/*/layoutText/words/*/text"
+                                Source = "/document/nativeTextAndOcr"
                             }
                         },
                         outputs: new List<OutputFieldMappingEntry>()
                         {
-                            new OutputFieldMappingEntry(name: "cryptonyms")
+                            new OutputFieldMappingEntry(name: "sdgcategories")
                         },
-                        uri: string.Format("{0}/api/link-cryptonyms-list?code={1}", azureFunctionEndpointUri, ConfigurationManager.AppSettings["AzureFunctionHostKey"]))
+                        uri: string.Format("{0}/api/identify-sdgs?code={1}", azureFunctionEndpointUri, ConfigurationManager.AppSettings["AzureFunctionHostKey"]))
                     {
-                        Description = "Cryptonym linker",
+                        Description = "SDG identifier",
                         Context = "/document",
                         BatchSize = 1
                     }
-                    //new WebApiSkill(inputs: new List<InputFieldMappingEntry>()
-                    //    {
-                    //        new InputFieldMappingEntry(name: "documentContent")
-                    //        {
-                    //            Source = "/document/nativeTextAndOcr"
-                    //        }
-                    //    },
-                    //    outputs: new List<OutputFieldMappingEntry>()
-                    //    {
-                    //        new OutputFieldMappingEntry(name: "sdgcategories")
-                    //    },
-                    //    uri: string.Format("{0}/api/identify-sdgs?code={1}", azureFunctionEndpointUri, ConfigurationManager.AppSettings["AzureFunctionHostKey"]))
-                    //{
-                    //    Description = "SDG identifier",
-                    //    Context = "/document",
-                    //    BatchSize = 1
-                    //}
             })
             {
                 Name = name,
